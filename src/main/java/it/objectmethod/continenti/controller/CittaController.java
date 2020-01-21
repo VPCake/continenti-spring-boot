@@ -4,20 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import it.objectmethod.continenti.dao.ICittaDao;
 import it.objectmethod.continenti.dao.INazioneDao;
 import it.objectmethod.continenti.model.Citta;
 import it.objectmethod.continenti.model.Nazione;
 
-@Controller
+@RestController
 public class CittaController {
 
 	@Autowired
@@ -25,38 +26,32 @@ public class CittaController {
 
 	@Autowired
 	private ICittaDao cittaDao;
-	
+
 	@GetMapping("/citta/{codNaz}/show")
-	public String printCities(@PathVariable("codNaz") String codice, ModelMap model) {
+	public List<Citta> printCities(@PathVariable("codNaz") String codice) {
 
 		List<Citta> citta = new ArrayList<Citta>();
 		citta = cittaDao.getCityByCountryCode(codice);
 
-		model.addAttribute("citta", citta);
-		return "citta";
+		return citta;
 	}
-	
+
 	@RequestMapping("/ricerca")
-	public String search(ModelMap model) {
+	public List<Nazione> search(@RequestBody Citta c) {
 
 		List<Nazione> nazioni = new ArrayList<Nazione>();
 		nazioni = nazioneDao.getNations();
-		model.addAttribute("nazioni", nazioni);
-		return "ricerca";
+		return nazioni;
 	}
 
 	@GetMapping("/risultati-ricerca")
-	public String search(@RequestParam("name") String nome, @RequestParam("code") String code, ModelMap model) {
+	public List<Citta> ricerca(@RequestBody Citta c) {
 
-		List<Nazione> nazioni = new ArrayList<Nazione>();
-		nazioni = nazioneDao.getNations();
 		List<Citta> citta = new ArrayList<Citta>();
 
-		citta = cittaDao.getSearch(nome, code);
+		citta = cittaDao.getSearch(c.getName(), c.getCountryCode());
 
-		model.addAttribute("citta", citta);
-		model.addAttribute("nazioni", nazioni);
-		return "ricerca";
+		return citta;
 	}
 
 	@GetMapping("/modifica-city/{ID}/show")
